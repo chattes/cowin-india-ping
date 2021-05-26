@@ -1,5 +1,5 @@
 var cron = require("node-cron");
-const { addDays, format } = require("date-fns");
+const { addDays, format, getISODay } = require("date-fns");
 const got = require("got");
 const { delay, random } = require("lodash");
 const TelegramBot = require("node-telegram-bot-api");
@@ -29,14 +29,20 @@ const startJob = () => {
   });
 };
 
+const getNextMonday = () => {
+  let today = getISODay(new Date());
+  let nextMondayDiff = 7 - (today - 1); // 1 is Monday
+  let nextWeekStart = addDays(new Date(), nextMondayDiff);
+  return format(nextWeekStart, "dd-MM-yyyy");
+};
+
 const pingCowin = async () => {
   try {
-    let daysToAdd = Math.floor(Math.random() * 10) + 1;
-    let nextBestDate = addDays(new Date(), daysToAdd);
-    let nextBestDateFormatted = format(nextBestDate, "dd-MM-yyyy");
+    let nextWeek = getNextMonday();
 
-    console.log(`Setting up a Query for ${nextBestDateFormatted}`);
-    const url = `https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByDistrict?district_id=725&date=${nextBestDateFormatted}`;
+    console.log(`Setting up query for ${nextWeek}`);
+
+    const url = `https://cdn-api.co-vin.in/api/v2/appointment/sessions/calendarByDistrict?district_id=725&date=${nextWeek}`;
     const response = await got(url, {
       responseType: "json",
       resolveBodyOnly: true,
