@@ -9,6 +9,9 @@ const bot = new TelegramBot(process.env.CHANNEL_TOKEN, {
 });
 
 const startJob = () => {
+  if (!process.env.CHANNEL_TOKEN) {
+    throw new Error("No Telegram Token found");
+  }
   cron.schedule("*/10 * * * *", async () => {
     console.log("******************************************");
     console.log(`Job Starting... at ${new Date()}`);
